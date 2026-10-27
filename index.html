@@ -15,31 +15,38 @@
   .bal { font-size:56px; font-weight:700; margin:8px 0 4px; font-variant-numeric:tabular-nums; }
   .chg { font-size:18px; font-weight:600; font-variant-numeric:tabular-nums; }
   .up { color:var(--up); } .down { color:var(--down); }
+  .pos { margin-top:16px; font-size:14px; font-variant-numeric:tabular-nums; text-align:left; }
+  .pos div { display:flex; justify-content:space-between; padding:4px 0; }
   .foot { color:var(--muted); font-size:13px; margin-top:18px; line-height:1.5; }
 </style>
 </head>
 <body>
 <div class="card">
-  <div class="label">Paper account balance</div>
+  <div class="label">Live account value</div>
   <div class="bal" id="bal">&mdash;</div>
   <div class="chg" id="chg"></div>
+  <div class="pos" id="pos"></div>
   <div class="foot" id="foot">Loading&hellip;</div>
 </div>
 <script>
+const sign = x => (x >= 0 ? '+' : '−');
 async function load() {
   try {
     const r = await fetch('balance.json?t=' + Date.now(), { cache: 'no-store' });
     const d = await r.json();
-    const diff = d.cash - d.start;
-    document.getElementById('bal').textContent = '$' + d.cash.toFixed(2);
+    const value = d.value ?? d.cash, diff = value - d.start;
+    document.getElementById('bal').textContent = '$' + value.toFixed(2);
     const c = document.getElementById('chg');
-    c.textContent = (diff >= 0 ? '+' : '−') + '$' + Math.abs(diff).toFixed(2) + ' (' + (diff >= 0 ? '+' : '−') + Math.abs(diff / d.start * 100).toFixed(2) + '%)';
+    c.textContent = sign(diff) + '$' + Math.abs(diff).toFixed(2) + ' (' + sign(diff) + Math.abs(diff / d.start * 100).toFixed(2) + '%)';
     c.className = 'chg ' + (diff >= 0 ? 'up' : 'down');
-    document.getElementById('foot').innerHTML = (d.open ? d.open + ' open trade' + (d.open > 1 ? 's' : '') + '<br>' : '') +
-      'Updated ' + d.updated + '<br>Simulated trades, fake money';
+    document.getElementById('pos').innerHTML = (d.positions || []).map(p =>
+      '<div><span>' + p.symbol + ' @ $' + p.price.toFixed(2) + '</span><span class="' + (p.pnl >= 0 ? 'up' : 'down') + '">' +
+      sign(p.pnl) + '$' + Math.abs(p.pnl).toFixed(2) + '</span></div>').join('');
+    document.getElementById('foot').innerHTML = 'Cash $' + d.cash.toFixed(2) + '<br>Prices as of ' + d.updated +
+      '<br>Simulated trades, fake money';
   } catch (e) { document.getElementById('foot').textContent = 'Could not load balance.'; }
 }
-load(); setInterval(load, 60000);
+load(); setInterval(load, 500);
 </script>
 </body>
 </html>
