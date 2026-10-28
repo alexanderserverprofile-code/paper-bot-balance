@@ -1,1 +1,1 @@
-{"cash": 1000.0, "value": 1000.0, "start": 1000.0, "open": 0, "positions": [], "updated": "Oct 28, 02:35 PM ET"}
+{"cash": 1000.0, "value": 1000.43, "start": 1000.0, "open": 1, "positions": [{"symbol": "AMD", "price": 574.82, "pnl": 0.43}], "updated": "Oct 28, 02:40 PM ET"}
